@@ -1,7 +1,6 @@
 #include "Streamer.h"
 
 #include "Logging.h"
-#include "PixelStreaming2PluginSettings.h"
 #include "UtilsAAC.h"
 #include "UtilsAVC.h"
 #include "VideoProducerBackBuffer.h"
@@ -91,8 +90,9 @@ namespace UE::PixelStreamingRTMP
 
 		RTMP_Init(Stream->RtmpPtr);
 
-		EVideoCodec CurrentCodec = UE::PixelStreaming2::GetEnumFromCVar<EVideoCodec>(UPixelStreaming2PluginSettings::CVarEncoderCodec);
-		VideoEncoder = CreateVideoEncoder(CurrentCodec);
+		// RTMP (in its original spec) only carries H.264, so we always encode H.264 rather than
+		// honoring the Pixel Streaming encoder codec CVar.
+		VideoEncoder = CreateVideoEncoder(EVideoCodec::H264);
 
 		AudioEncoder = CreateAudioEncoder();
 	}
@@ -392,7 +392,7 @@ namespace UE::PixelStreamingRTMP
 			EnqueuePacket(Stream, MakeDataPacket(reinterpret_cast<const uint8*>(Metadata), static_cast<uint32>(enc - Metadata)));
 		});
 
-		EVideoCodec CurrentCodec = UE::PixelStreaming2::GetEnumFromCVar<EVideoCodec>(UPixelStreaming2PluginSettings::CVarEncoderCodec);
+		EVideoCodec CurrentCodec = Packet.CodecSpecificInfo.Codec;
 		switch (CurrentCodec)
 		{
 			case EVideoCodec::H264:
