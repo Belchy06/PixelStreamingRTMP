@@ -97,6 +97,12 @@ namespace UE::PixelStreamingRTMP
 		bool			  bIsStreaming;
 		TOptional<uint64> DtsOffset;
 
+		// Per-stream "sequence header sent" guards. Reset on StartStreaming so a stop/start
+		// cycle re-sends the onMetaData script tag and the AAC sequence header; a process-wide
+		// UE_CALL_ONCE would only ever send them on the first stream of the application run.
+		bool bSentMetadata = false;
+		bool bSentAudioHeader = false;
+
 		TSharedPtr<FRTMPVideoCapturer> VideoCapturer;
 		TSharedPtr<FVideoSourceGroup>  VideoSourceGroup;
 		TSharedPtr<FRTMPVideoSource>   VideoSource;

@@ -214,6 +214,12 @@ namespace UE::PixelStreamingRTMP
 
 	void FRTMPStreamer::StartStreaming()
 	{
+		// Fresh stream: clear the shared timestamp base and re-arm the sequence-header guards so
+		// this start re-sends onMetaData and the AAC sequence header (see the guard members).
+		DtsOffset.Reset();
+		bSentMetadata = false;
+		bSentAudioHeader = false;
+
 		char* RawURL = TCHAR_TO_ANSI(*ConnectionURL);
 		RTMP_SetupURL(Stream->RtmpPtr, RawURL);
 
@@ -364,9 +370,12 @@ namespace UE::PixelStreamingRTMP
 			DtsOffset = Packet.Timestamp;
 		}
 
-		// Send the stream metadata (onMetaData) exactly once, mirroring how the audio/video
+		// Send the stream metadata (onMetaData) once per stream, mirroring how the audio/video
 		// sequence headers are sent: build the AMF payload and enqueue it as a data packet.
-		UE_CALL_ONCE([&]() {
+		if (!bSentMetadata)
+		{
+			bSentMetadata = true;
+
 			char  Metadata[4096];
 			char* enc = Metadata;
 			char* end = enc + sizeof(Metadata);
@@ -390,7 +399,7 @@ namespace UE::PixelStreamingRTMP
 			*enc++ = AMF_OBJECT_END;
 
 			EnqueuePacket(Stream, MakeDataPacket(reinterpret_cast<const uint8*>(Metadata), static_cast<uint32>(enc - Metadata)));
-		});
+		}
 
 		EVideoCodec CurrentCodec = Packet.CodecSpecificInfo.Codec;
 		switch (CurrentCodec)
@@ -418,11 +427,14 @@ namespace UE::PixelStreamingRTMP
 			DtsOffset = Packet.Timestamp;
 		}
 
-		// Send the AAC sequence header (AudioSpecificConfig) exactly once before any raw
+		// Send the AAC sequence header (AudioSpecificConfig) once per stream before any raw
 		// AAC frames, mirroring how the AVC SPS/PPS sequence header is sent for video.
 		// Strict RTMP servers (e.g. MediaMTX) need it to set up the audio track, otherwise
 		// they reject the stream with "received a packet for audio track 0, but track is not set".
-		UE_CALL_ONCE([&]() {
+		if (!bSentAudioHeader)
+		{
+			bSentAudioHeader = true;
+
 			const uint8 ObjectType = 2; // AAC-LC
 			// Map the sample rate to its MPEG-4 sampling frequency index.
 			const uint8 RateIdx = SampleRateToMpeg4Index.FindRef(SampleRate);
@@ -435,7 +447,7 @@ namespace UE::PixelStreamingRTMP
 			Asc[1] = ((RateIdx & 0x1) << 7) | (ChannelConfig << 3);
 
 			EnqueuePacket(Stream, MakeAudioPacket(Asc, 2, static_cast<uint32>(Packet.Timestamp - DtsOffset.GetValue()), true /* bIsHeader */));
-		});
+		}
 
 		HandleAacPacket(Stream, Packet, NumChannels, SampleRate, DtsOffset.GetValue());
 	}
