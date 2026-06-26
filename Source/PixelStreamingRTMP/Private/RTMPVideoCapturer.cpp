@@ -1,5 +1,3 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
-
 #include "RTMPVideoCapturer.h"
 
 #include "RTMPVideoBufferMultiFormat.h"
