@@ -1,0 +1,55 @@
+{
+	"FileVersion": 3,
+	"Version": 1.0,
+	"VersionName": "1.0",
+	"FriendlyName": "Pixel Streaming 2 RTMP",
+	"Description": "Streaming of Unreal Engine audio and rendering to RTMP-compatible media players such as a web browsers.",
+	"Category": "Graphics",
+	"CreatedBy": "TensorWorks",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"EnabledByDefault": false,
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "PixelStreamingRTMP",
+			"Type": "Runtime",
+			"LoadingPhase": "PreDefault",
+			"PlatformAllowList": [ "Win64" ],
+			"TargetDenyList": [ ]
+		},
+	],
+	"Plugins": [
+        {
+			"Name": "PixelStreaming2",
+			"Enabled": true
+		},
+		{
+			"Name": "PixelCapture",
+			"Enabled": true
+		},
+		{
+			"Name": "AVCodecsCore",
+			"Enabled": true
+		},
+		{
+			"Name": "NVCodecs",
+			"Enabled": true,
+            "PlatformAllowList": [ "Win64", "Linux" ]
+		},
+		{
+			"Name": "WMFCodecs",
+			"Enabled": true,
+            "PlatformAllowList": [ "Win64" ]
+		},
+		{
+			"Name": "WmfMedia",
+			"Enabled": true,
+			"PlatformAllowList": [ "Win64" ]
+		}
+	]
+}
