@@ -17,6 +17,7 @@ namespace UnrealBuildTool.Rules
 			{
 				System.IO.Path.Combine(GetModuleDirectory("PixelStreaming2"), "Internal"),
 				System.IO.Path.Combine(GetModuleDirectory("PixelStreaming2Settings"), "Internal"),
+				System.IO.Path.Combine(GetModuleDirectory("PixelStreamingRTMPSettings"), "Internal"),
 			});
 
 			PrivateDependencyModuleNames.AddRange(new string[]
@@ -28,6 +29,7 @@ namespace UnrealBuildTool.Rules
 				"PixelStreaming2",
 				"PixelStreaming2Core",
 				"PixelStreaming2Settings",
+				"PixelStreamingRTMPSettings",
 				"AVCodecsCore",
                 "AVCodecsCoreRHI",
 				"PixelCapture",

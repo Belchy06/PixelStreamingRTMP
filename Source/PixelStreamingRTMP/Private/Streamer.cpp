@@ -1,6 +1,7 @@
 #include "Streamer.h"
 
 #include "Logging.h"
+#include "PixelStreamingRTMPPluginSettings.h"
 #include "UtilsAAC.h"
 #include "UtilsAVC.h"
 #include "VideoProducerBackBuffer.h"
@@ -202,6 +203,11 @@ namespace UE::PixelStreamingRTMP
 		return ConnectionURL;
 	}
 
+	void FRTMPStreamer::SetStreamKey(const FString& InStreamKey)
+	{
+		StreamKey = InStreamKey;
+	}
+
 	FString FRTMPStreamer::GetId()
 	{
 		return StreamerId;
@@ -220,7 +226,19 @@ namespace UE::PixelStreamingRTMP
 		bSentMetadata = false;
 		bSentAudioHeader = false;
 
-		char* RawURL = TCHAR_TO_ANSI(*ConnectionURL);
+		// The base connection URL (from CVarConnectionURL) is the RTMP server/app; append the
+		// stream key to form the full publish URL, e.g. rtmp://host:1935/app + "/" + key.
+		FString FullURL = ConnectionURL;
+		if (!StreamKey.IsEmpty())
+		{
+			if (!FullURL.EndsWith(TEXT("/")))
+			{
+				FullURL += TEXT("/");
+			}
+			FullURL += StreamKey;
+		}
+
+		char* RawURL = TCHAR_TO_ANSI(*FullURL);
 		RTMP_SetupURL(Stream->RtmpPtr, RawURL);
 
 		RTMP_EnableWrite(Stream->RtmpPtr);
@@ -471,6 +489,14 @@ namespace UE::PixelStreamingRTMP
 	{
 		TSharedPtr<FRTMPStreamer> NewStreamer = MakeShared<FRTMPStreamer>(StreamerId);
 		NewStreamer->SetVideoProducer(UE::PixelStreaming2::FVideoProducerBackBuffer::Create());
+
+		// Only the default streamer picks up the configured default stream key. The base
+		// connection URL is set separately by the PixelStreaming2 framework (from
+		// CVarConnectionURL); the key is appended to it when we connect.
+		if (StreamerId == UPixelStreaming2PluginSettings::CVarDefaultStreamerID.GetValueOnAnyThread())
+		{
+			NewStreamer->SetStreamKey(UPixelStreamingRTMPPluginSettings::CVarDefaultStreamKey.GetValueOnAnyThread());
+		}
 
 		return NewStreamer;
 	}

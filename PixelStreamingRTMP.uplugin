@@ -16,6 +16,13 @@
 	"Installed": false,
 	"Modules": [
 		{
+			"Name": "PixelStreamingRTMPSettings",
+			"Type": "Runtime",
+			"LoadingPhase": "PreDefault",
+			"PlatformAllowList": [ "Win64" ],
+			"TargetDenyList": [ ]
+		},
+		{
 			"Name": "PixelStreamingRTMP",
 			"Type": "Runtime",
 			"LoadingPhase": "PreDefault",

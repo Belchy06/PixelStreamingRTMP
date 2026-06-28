@@ -50,6 +50,7 @@ namespace UE::PixelStreamingRTMP
 		virtual TArray<TWeakPtr<IPixelStreaming2AudioProducer>> GetAudioProducers() override;
 		virtual void											SetConnectionURL(const FString& InConnectionURL) override;
 		virtual FString											GetConnectionURL() override;
+		void													SetStreamKey(const FString& InStreamKey);
 		virtual FString											GetId() override;
 		virtual bool											IsConnected() override;
 		virtual void											StartStreaming() override;
@@ -92,6 +93,7 @@ namespace UE::PixelStreamingRTMP
 
 		FString			  StreamerId;
 		FString			  ConnectionURL;
+		FString			  StreamKey;
 		bool			  bIsStreaming;
 		TOptional<uint64> DtsOffset;
 
